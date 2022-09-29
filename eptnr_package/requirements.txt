@@ -1,0 +1,13 @@
+pandas==1.5.0
+geopandas==0.11.1
+numpy==1.23.3
+torch==1.12.1
+matplotlib==3.6.0
+igraph==0.10.1
+networkx==2.8.6
+osmnx==1.2.2
+pygad==2.18.1
+tqdm==4.64.1
+pyarrow==9.0.0
+urbanaccess==0.2.2
+jupyterlab==3.4.7
