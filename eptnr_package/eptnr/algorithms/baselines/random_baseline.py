@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import random
 import igraph as ig
-from ..rewards import BaseReward
+from ...rewards import BaseReward
 
 
 def random_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],

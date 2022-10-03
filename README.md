@@ -14,6 +14,7 @@ $ conda env create -f ./en
 
 # Citations
 **TBC**
+Only use Python 3.9 otherwise you'll cry.
 
 # Contribution and Extension
 Most of this repository was designed to be easily fork-able, reproducible, and extensible. If you are a researcher aiming to extend the EPTNR problem definition or try different algorithms or heuristic searches on it, the best point to start is the `eptnr_package`.

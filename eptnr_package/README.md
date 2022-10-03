@@ -26,8 +26,8 @@ This package is part of the equally titled master thesis, part of the [EquiCity]
 ## Installation
 ### External dependencies
 Unfortunately, we still have an external dependency to deal with GTFS zip files on transitland's CLI which we need for the problem-graph generation. Hence, we first require you to install:
-- (For Linux)[https://github.com/interline-io/transitland-lib/releases/download/v0.10.3/transitland-linux]
-- (For MacOS)[https://github.com/interline-io/transitland-lib/releases/download/v0.10.3/transitland-macos.zip]
+- [For Linux](https://github.com/interline-io/transitland-lib/releases/download/v0.10.3/transitland-linux)
+- [For MacOS](https://github.com/interline-io/transitland-lib/releases/download/v0.10.3/transitland-macos.zip)
 
 And add it to your `$PATH` variable such that it is callable as a sub-process with the command `transitlanId`.
 

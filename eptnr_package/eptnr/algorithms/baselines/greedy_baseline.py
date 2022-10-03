@@ -1,6 +1,6 @@
 from typing import Tuple, List
 import igraph as ig
-from ..rewards import BaseReward
+from ...rewards import BaseReward
 
 
 def greedy_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],

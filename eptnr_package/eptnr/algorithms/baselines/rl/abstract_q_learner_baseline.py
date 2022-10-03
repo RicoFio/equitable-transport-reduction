@@ -6,9 +6,9 @@ from typing import Tuple, List, Optional, Union
 import abc
 import math
 
-from ...rewards import BaseReward
+from ....rewards import BaseReward
 from ...q_learning_utils.epsilon_schedule import EpsilonSchedule
-from ...exceptions.q_learner_exceptions import ActionAlreadyTakenError
+from ....exceptions.q_learner_exceptions import ActionAlreadyTakenError
 
 import numpy as np
 

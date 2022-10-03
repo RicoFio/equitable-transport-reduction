@@ -10,7 +10,7 @@ from .transition import Transition
 
 import torch
 from torch import nn
-from ..algorithms.rl.abstract_q_learner_baseline import AbstractQLearner
+from ..rl.abstract_q_learner_baseline import AbstractQLearner
 from ..rewards import BaseReward
 from ..q_learning_utils.epsilon_schedule import EpsilonSchedule
 from .model import DQN
@@ -20,7 +20,7 @@ import torch.optim as optim
 import random
 import math
 from pathlib import Path
-from ..exceptions.q_learner_exceptions import ActionAlreadyTakenError
+from ....exceptions.q_learner_exceptions import ActionAlreadyTakenError
 
 logging.basicConfig()
 logger = logging.getLogger(__file__)
@@ -31,74 +31,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # Code adapted from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
-
-
-class DummyQTargetNet:
-
-    def __init__(self):
-        pass
-
-    def evaluate(self):
-        def func(x: torch.Tensor):
-            q_table = {
-                '[0.0, 1.0, 1.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 0.0, 1.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 1.0, 0.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 1.0, 1.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[0.0, 0.0, 1.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[0.0, 1.0, 0.0, 1.0]': torch.tensor([50.00000, 0.00000, 0.00000, 0.00000]),
-                '[0.0, 1.0, 1.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 0.0, 0.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 0.0, 1.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 1.0, 0.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 50.00000]),
-                '[0.0, 0.0, 0.0, 1.0]': torch.tensor([0.00000, 50.00000, 50.00000, 0.00000]),
-                '[0.0, 0.0, 1.0, 0.0]': torch.tensor([0.00000, 100.00000, 0.00000, 50.00000]),
-                '[0.0, 1.0, 0.0, 0.0]': torch.tensor([50.00000, 0.00000, 100.00000, 50.00000]),
-                '[1.0, 0.0, 0.0, 0.0]': torch.tensor([0.00000, 50.00000, 0.00000, 0.00000]),
-                '[0.0, 0.0, 0.0, 0.0]': torch.tensor([50.00000, 100.00000, 100.00000, 50.00000]),
-            }
-            final_values = []
-
-            for i in x.tolist():
-                final_values.append(q_table[str(i)])
-
-            return torch.cat(final_values).view(-1, len(i))
-
-        return func
-
-
-class DummyMaxQTargetNet:
-
-    def __init__(self):
-        pass
-
-    def evaluate(self):
-        def func(x: torch.Tensor):
-            q_table = {
-                '[0.0, 1.0, 1.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 0.0, 1.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 1.0, 0.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 1.0, 1.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[0.0, 0.0, 1.0, 1.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[0.0, 1.0, 0.0, 1.0]': torch.tensor([50.00000, 0.00000, 0.00000, 0.00000]),
-                '[0.0, 1.0, 1.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 0.0, 0.0, 1.0]': torch.tensor([0.00000, 50.00000, 0.00000, 0.00000]),
-                '[1.0, 0.0, 1.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 0.00000]),
-                '[1.0, 1.0, 0.0, 0.0]': torch.tensor([0.00000, 0.00000, 0.00000, 50.00000]),
-                '[0.0, 0.0, 0.0, 1.0]': torch.tensor([0.00000, 50.00000, 50.00000, 0.00000]),
-                '[0.0, 0.0, 1.0, 0.0]': torch.tensor([0.00000, 100.00000, 0.00000, 50.00000]),
-                '[0.0, 1.0, 0.0, 0.0]': torch.tensor([100.00000, 0.00000, 100.00000, 50.00000]),
-                '[1.0, 0.0, 0.0, 0.0]': torch.tensor([0.00000, 100.00000, 0.00000, 50.00000]),
-                '[0.0, 0.0, 0.0, 0.0]': torch.tensor([150.00000, 100.00000, 100.00000, 50.00000]),
-            }
-            final_values = []
-
-            for i in x.tolist():
-                final_values.append(q_table[str(i)])
-
-            return torch.cat(final_values).view(-1, len(i))
-
-        return func
 
 
 class AbstractDeepQLearner(AbstractQLearner, abc.ABC):

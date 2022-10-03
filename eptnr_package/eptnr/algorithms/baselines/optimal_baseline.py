@@ -2,7 +2,7 @@ import itertools as it
 from typing import Tuple, List
 import igraph as ig
 import numpy as np
-from ..rewards import BaseReward
+from ...rewards import BaseReward
 from tqdm import tqdm
 import logging
 from .utils.compute_rewards import compute_rewards_over_removals

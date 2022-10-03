@@ -13,7 +13,7 @@ from .utils.graph_helper_utils import (
     append_length_attribute,
 )
 from .utils.osm_utils import get_bbox
-from .exceptions import GraphGenerationError
+from ..exceptions.graph_generation_exceptions import GraphGenerationError
 from .utils.file_management_utils import (
     remove_files_in_dir,
 )
