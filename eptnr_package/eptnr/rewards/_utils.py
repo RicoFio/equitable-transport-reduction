@@ -70,7 +70,7 @@ def _to_array(ray_list: List[ray.ObjectRef], n_nb_nodes: int, n_poi_nodes: int) 
 
 
 def evaluate_graph(g: ig.Graph) -> pd.DataFrame:
-    nb_nodes = g.vs.select(type_eq='res_node')
+    nb_nodes = g.vs.select(type_eq='rc_node')
     # nb_node_ids = [elem.index for elem in nb_nodes]
     # n_nb_nodes = len(nb_nodes)
     poi_nodes = g.vs.select(type_eq='poi_node')

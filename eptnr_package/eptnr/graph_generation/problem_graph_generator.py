@@ -44,7 +44,7 @@ class ProblemGraphGenerator:
                                                        out_dir_path=out_dir_path, day=day,
                                                        time_from=time_from, time_to=time_to, agencies=agencies,
                                                        contract_vertices=True, modalities=modalities)
-        self.osm_graph_generator = OSMGraphGenerator(city=city, network_type=OSMNetworkTypes.WALK,
+        self.osm_graph_generator = OSMGraphGenerator(city=city, network_type=OSMNetworkTypes.walk,
                                                      graph_out_path=out_dir_path)
         self.out_dir_path = out_dir_path
         self.poi_gdf = poi_gdf
@@ -93,7 +93,7 @@ class ProblemGraphGenerator:
 
         # Names have to be integers!
         add_points_to_graph(g=g, names=rc_names, xs=rc_xs, ys=rc_ys,
-                            v_type='res_node', color='RED', ref_name=rc_names)
+                            v_type='rc_node', color='RED', ref_name=rc_names)
 
         # Add all POIs as vertices
         logger.debug("Adding POI vertices to graph")
@@ -108,14 +108,14 @@ class ProblemGraphGenerator:
                             v_type='poi_node', color='GREEN', ref_name=poi_names)
 
         # Add edges from all res centroids to all POIs
-        logger.debug(f"Adding edges res_node->poi_node")
-        add_edges_to_graph(g=g, osm_graph=osm_graph, from_node_type='res_node', to_node_type='poi_node',
+        logger.debug(f"Adding edges rc_node->poi_node")
+        add_edges_to_graph(g=g, osm_graph=osm_graph, from_node_type='rc_node', to_node_type='poi_node',
                            e_type='walk', speed=MetricTravelSpeed.WALKING.value, color='GRAY',
                            distances_computation_mode=self.distances_computation_mode)
 
         # Add edges from all res centroids to all PT stations
-        logger.debug(f"Adding edges res_node->pt_node")
-        add_edges_to_graph(g=g, osm_graph=osm_graph, from_node_type='res_node', to_node_type='pt_node',
+        logger.debug(f"Adding edges rc_node->pt_node")
+        add_edges_to_graph(g=g, osm_graph=osm_graph, from_node_type='rc_node', to_node_type='pt_node',
                            e_type='walk', speed=MetricTravelSpeed.WALKING.value, color='GRAY',
                            distances_computation_mode=self.distances_computation_mode)
 

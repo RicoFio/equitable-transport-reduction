@@ -48,12 +48,12 @@ def plot_rewards(ax: plt.Axes, edges: List[int], rewards: List[float],
 
 def plot_graph(ax: plt.Axes, base_graph: ig.Graph, edges: List[int]):
     g_prime: ig.Graph = base_graph.copy()
-    g_prime.vs.select(type_eq='res_node')['color'] = 'red'
+    g_prime.vs.select(type_eq='rc_node')['color'] = 'red'
     g_prime.vs.select(type_eq='pt_node')['color'] = 'blue'
     g_prime.vs.select(type_eq='poi_node')['color'] = 'green'
 
     color_dict = {
-        'res_node': 'red',
+        'rc_node': 'red',
         'pt_node': 'blue',
         'poi_node': 'green',
     }
