@@ -130,3 +130,6 @@ dmypy.json
 
 # JetBrains
 .idea
+
+# Not shareable data
+reference_papers/

@@ -1,5 +1,5 @@
 import igraph as ig
-from ._utils import series_min_max_norm
+from .utils.graph_computation_utils import series_min_max_norm
 from ..constants.travel_metric import TravelMetric
 from .base_reward import BaseReward
 import logging

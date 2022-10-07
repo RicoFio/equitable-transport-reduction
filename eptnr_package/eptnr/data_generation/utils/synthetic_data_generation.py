@@ -1,6 +1,10 @@
 import igraph as ig
 import numpy as np
-from typing import List, Tuple
+from typing import (
+    List,
+    Tuple,
+    Dict
+)
 from .synthetic_speeds import SyntheticTravelSpeeds
 from ...constants.igraph_edge_types import IGraphEdgeTypes
 from ...constants.igraph_colors import IGraphColors
@@ -70,3 +74,9 @@ def graph_walking_edges_generation(graph: ig.Graph, vertices: List[EPTNRVertex])
         color=IGraphColors.GRAY,
         round_to_decimals=2,
     )
+
+
+def add_cost_per_unit(graph: ig.Graph, cost_per_unit_dict: Dict[IGraphEdgeTypes, float]):
+
+    cost_gen = [edge['distance'] * cost_per_unit_dict.get(IGraphEdgeTypes(edge['type']), 0) for edge in graph.es]
+    graph.es.set_attribute_values('cost', cost_gen)

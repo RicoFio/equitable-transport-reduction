@@ -3,7 +3,7 @@ import igraph as ig
 import pandas as pd
 from typing import List, Dict
 from ..constants.travel_metric import TravelMetric
-from ._utils import get_tt_hops_com_dfs
+from .utils.graph_computation_utils import get_tt_hops_com_dfs
 import logging
 
 logging.basicConfig()
