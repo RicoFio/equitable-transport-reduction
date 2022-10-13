@@ -125,9 +125,12 @@ def generate_samples(metric_df: pd.DataFrame, inh_per_group: pd.DataFrame) -> pd
     city = pd.DataFrame(columns=['metric_value', 'group'])
 
     for group in merged_df.loc[:, merged_df.columns.str.contains('n_')].columns:
-        samples_group = np.repeat(merged_df['average'].values, merged_df[group])
+        samples_group = np.repeat(merged_df['average'].values, merged_df[group].to_numpy())
         samples_group = samples_group.reshape((-1, 1))
-        labels = np.repeat(group.replace('n_', ''), samples_group.shape[0]).reshape((-1, 1))
+
+        labels = np.repeat(group.replace('n_', ''), samples_group.shape[0])
+        labels = labels.reshape((-1, 1))
+
         group_individuals = np.hstack([samples_group, labels])
         df = pd.DataFrame(group_individuals, columns=['metric_value', 'group'])
         city = pd.concat([city, df], axis=0)
