@@ -115,7 +115,11 @@ def plot_full_problem_exploration(base_graph: ig.Graph,
     fig, ax = plt.subplots(n_rows, n_cols, sharex=True, sharey=True, figsize=(4 * n_cols, 3.2 * n_rows),
                            constrained_layout=True)
 
+    absolute_max = max([max(rc) for rc in rewards])
+
     for i, (config_candidates, rewards_candidates) in enumerate(zip(configurations, rewards)):
+        max_reward = max(rewards_candidates)
+
         for j, (cand, reward) in enumerate(zip(config_candidates, rewards_candidates)):
             plot_graph(ax=ax[j, i], base_graph=base_graph, edges=cand)
             # ax[j, i].legend([], [f'$\\mathdefault{reward}$'],
@@ -130,6 +134,11 @@ def plot_full_problem_exploration(base_graph: ig.Graph,
             ax[j, i].set_title(f'Reward: {reward:.4f}', fontdict=font)
             ax[j, i].set_xticks([])
             ax[j, i].set_yticks([])
+            if reward == absolute_max:
+                ax[j, i].set_facecolor((0.2, 0.47, 0.9, 0.2))
+            elif reward == max_reward:
+                ax[j, i].set_facecolor((1.0, 0.47, 0.42, 0.2))
+
         for a in ax[j + 1:, i]:
             a.axis('off')
 

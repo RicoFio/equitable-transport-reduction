@@ -13,9 +13,8 @@ logger.setLevel(logging.INFO)
 
 class BaseReward(abc.ABC):
 
-    def __init__(self, census_data: pd.DataFrame, com_threshold: float,
-                 groups: List[str] = None, metrics: List[TravelMetric] = None,
-                 verbose: bool = False) -> None:
+    def __init__(self, census_data: pd.DataFrame, com_threshold: float, groups: List[str] = None,
+                 metrics: List[TravelMetric] = None, verbose: bool = False, reward_scaling=False) -> None:
 
         self.census_data = census_data
         self.com_threshold = com_threshold
@@ -23,6 +22,7 @@ class BaseReward(abc.ABC):
         self.metrics = metrics or [TravelMetric.TT, TravelMetric.HOPS, TravelMetric.COM]
         self.metrics_names = [t.value for t in self.metrics]
         self.verbose = verbose
+        self.reward_scaling = reward_scaling
 
         self.groups = groups
 
@@ -63,7 +63,10 @@ class BaseReward(abc.ABC):
                         f"\tn_vertices={len(g_prime.vs)}\n"
                         f"\tavailable_edges={[e.index for e in g_prime.es]}")
         calculated_reward = self._evaluate(g_prime, *args, **kwargs)
-        scaled_reward = self._reward_scaling(calculated_reward)
+        if self.reward_scaling:
+            scaled_reward = self._reward_scaling(calculated_reward)
+        else:
+            scaled_reward = calculated_reward
         if self.verbose:
             logger.info(f"Resulting rewards:\n"
                         f"\t{calculated_reward=}\n"
