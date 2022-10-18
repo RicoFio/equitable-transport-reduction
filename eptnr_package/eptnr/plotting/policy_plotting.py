@@ -79,11 +79,12 @@ class PolicyPlotter:
         return self._plot_policy(states_labels=states, actions_labels=actions, policy=policy,
                                  title=title, fig=fig, ax=ax)
 
-    def from_model(self, model: nn.Module, budget: int, actions: List[int], title: str,
+    def from_model(self, model: nn.Module, actions: List[int], title: str,
                    fig: plt.Figure = None, ax: plt.Axes = None) -> Tuple[plt.Figure, plt.Axes]:
         # Create states
         states = []
-        possible_removed_edges = [list(combination) for k in range(0, budget + 1)
+        possible_removed_edges = [list(combination)
+                                  for k in range(0, len(actions) + 1)
                                   for combination in it.combinations(np.arange(0, len(actions)), k)]
         for mask in possible_removed_edges:
             a = np.zeros(len(actions))
@@ -103,7 +104,7 @@ class PolicyPlotter:
         masker_not_allowed = ~states_t
 
         masker_end_of_budget = torch.ones(states_t.shape)
-        masker_end_of_budget[states_t.sum(1) == budget] = 0
+        masker_end_of_budget[states_t.sum(1) == len(actions)] = 0
 
         policy = policy * masker_not_allowed
         policy[policy < 0] = 0

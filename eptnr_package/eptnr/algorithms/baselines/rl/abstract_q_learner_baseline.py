@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
 
 class AbstractQLearner(abc.ABC):
     def __init__(self, base_graph: ig.Graph, reward: BaseReward,
-                 edge_types: List[str], budget: int, episodes: int, step_size: float = 1.0,
+                 edge_types: List[str], episodes: int, step_size: float = 1.0,
                  eps_start: float = 1.0, eps_end: float = 0.01, eps_decay: float = 200, static_eps_steps: int = 0,
                  discount_factor: float = 1.0) -> None:
         self.base_graph = base_graph
@@ -31,16 +31,10 @@ class AbstractQLearner(abc.ABC):
         self.alpha = step_size
         self.gamma = discount_factor
 
-        self.goal = budget
         self.starting_state: Tuple[int] = ()
         self.wrong_action_reward: int = -100
 
         self.actions = np.array([e.index for e in self.base_graph.es.select(type_in=edge_types, active_eq=1)])
-
-        if len(self.actions) <= self.goal:
-            raise ValueError(f"Can only choose {len(self.actions)} edges, "
-                             f"hence max budget is {len(self.actions) - 1}. "
-                             f"Budget {self.goal} not possible.")
 
         self.q_values = self._get_q_value_dict()
 
@@ -62,7 +56,7 @@ class AbstractQLearner(abc.ABC):
     def _get_q_value_dict(self):
         return {
             self.get_state_key(tuple(e)): np.zeros(len(self.actions), dtype=np.float)
-            for k in range(self.goal + 1) for e in it.combinations(self.actions, k)
+            for k in range(len(self.actions)) for e in it.combinations(self.actions, k)
         }
 
     @staticmethod
@@ -130,7 +124,7 @@ class AbstractQLearner(abc.ABC):
         rewards_per_removal = []
         edges_removed = []
 
-        for i in range(self.goal):
+        for i in range(len(self.actions)):
             action_idx = self.choose_action(ord_state, 0)
             next_state, reward = self.step(ord_state, action_idx)
             edges_removed.append(next_state[-1])

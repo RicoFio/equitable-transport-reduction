@@ -10,15 +10,14 @@ from .transition import Transition
 
 import torch
 from torch import nn
-from ..rl.abstract_q_learner_baseline import AbstractQLearner
-from ..rewards import BaseReward
-from ..q_learning_utils.epsilon_schedule import EpsilonSchedule
+from ...baselines.rl.abstract_q_learner_baseline import AbstractQLearner
+from ....rewards import BaseReward
+from ...q_learning_utils.epsilon_schedule import EpsilonSchedule
 from .model import DQN
 from .replay_memory import ReplayMemory
 import logging
 import torch.optim as optim
 import random
-import math
 from pathlib import Path
 from ....exceptions.q_learner_exceptions import ActionAlreadyTakenError
 
@@ -31,16 +30,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # Code adapted from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
-
-
 class AbstractDeepQLearner(AbstractQLearner, abc.ABC):
 
-    def __init__(self, base_graph: ig.Graph, reward: BaseReward, edge_types: List[str], budget: int, episodes: int,
+    def __init__(self, base_graph: ig.Graph, reward: BaseReward, edge_types: List[str], episodes: int,
                  batch_size: int, replay_memory_size: int, target_network_update_step: int,
                  eps_start: float = 1.0, eps_end: float = 0.01, eps_decay: float = 200, static_eps_steps: int = 100,
                  step_size: float = 1, discount_factor: float = 1.0, save_model_every: int = 50,
                  save_model_path: Path = Path('./model_snapshots/')) -> None:
-        super().__init__(base_graph, reward, edge_types, budget, episodes, step_size, discount_factor)
+        super().__init__(base_graph, reward, edge_types, episodes, step_size, discount_factor)
 
         self.starting_state = torch.zeros(len(self.actions), dtype=torch.bool)
         self.wrong_action_reward: int = -100

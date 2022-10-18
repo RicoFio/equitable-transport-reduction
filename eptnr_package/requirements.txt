@@ -15,3 +15,7 @@ urbanaccess==0.2.2
 statsmodels==0.13.2
 inequality==1.0.0
 cairocffi==1.4.0
+xlrd==2.0.1
+folium==0.13.0
+mapclassify==2.4.3
+haversine==2.7.0

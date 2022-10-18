@@ -17,14 +17,14 @@ class MaxQLearner(AbstractQLearner):
             ord_state = self.get_state_key(self.starting_state)
             max_reward = -np.inf
 
-            while len(ord_state) != self.goal:
+            while len(ord_state) != len(self.actions):
                 epsilon = self.eps_schedule.get_current_eps()
                 action = self.choose_action(ord_state, epsilon=epsilon)
                 next_state, reward = self.step(ord_state, action)
                 next_ord_state = self.get_state_key(next_state)
 
-                # TODO: Double-check if I want to find the best state within k-budget or the best state after k budget
                 max_reward = np.max([max_reward, reward])
+
                 # MaxQ-Learning update according to https://arxiv.org/abs/2010.03744
                 self.q_values[ord_state][action] += self.alpha * (
                                                     np.max([reward, self.gamma * np.max(self.q_values[next_ord_state])]) -

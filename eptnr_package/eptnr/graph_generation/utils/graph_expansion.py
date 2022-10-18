@@ -92,9 +92,10 @@ def add_edges_to_graph(g: ig.Graph, osm_graph: nx.MultiDiGraph,
     distances[distances == np.inf] = distances.max()
 
     edge_attrs = {
-        'distance': distances,
+        'distance': np.round(distances, decimals=2),
         'type': e_type,
-        'tt': (distances / (speed * 1000)) * 60,
+        'tt': np.round((distances / (speed * 1000)) * 60, decimals=2),
+        'cost': 0,
         'color': color,
     }
 

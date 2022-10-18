@@ -133,3 +133,6 @@ dmypy.json
 
 # Not shareable data
 reference_papers/
+
+# Non-filtered GTFS files
+^.*gtfs((?!-filtered-).)*.zip

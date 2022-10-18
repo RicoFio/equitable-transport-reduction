@@ -33,7 +33,7 @@ class DeepQLearner(AbstractDeepQLearner):
             max_reward = -np.inf
 
             # while the state is not the terminal state
-            while state[state == 1].size()[0] < self.goal:
+            while state[state == 1].size()[0] < len(self.actions):
 
                 # Choose action with epsilon-greedy strategy
                 epsilon = self.eps_schedule.get_current_eps()
@@ -79,7 +79,7 @@ class DeepQLearner(AbstractDeepQLearner):
         state = self.starting_state
         rewards_per_removal = []
 
-        for i in range(self.goal):
+        for i in range(len(self.actions)):
             action_idx = self.choose_action(state, 0)
             state, reward = self.step(state, action_idx)
             rewards_per_removal.append(reward.item())
