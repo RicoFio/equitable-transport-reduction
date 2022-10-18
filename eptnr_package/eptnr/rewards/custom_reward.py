@@ -10,9 +10,6 @@ logger.setLevel(logging.INFO)
 
 
 class CustomReward(BaseReward):
-    """
-    This reward allows you to hard-code reward values depending on the
-    """
 
     def __init__(self, reward_dict: Dict, census_data: pd.DataFrame, com_threshold: float):
         self.reward_dict = reward_dict
@@ -22,6 +19,17 @@ class CustomReward(BaseReward):
         pass
 
     def evaluate(self, g: ig.Graph, *args, **kwargs) -> float:
+        """
+
+        Args:
+            com_threshold:
+            g:
+            census_data:
+            groups:
+
+        Returns:
+
+        """
         transit_edges = g.es.select(type_ne='walk', active_eq=0)
         edge_list = [e.index for e in transit_edges]
 

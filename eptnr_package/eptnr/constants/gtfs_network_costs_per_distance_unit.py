@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class GTFSNetworkCostsPerDistanceUnit(Enum):
+    WALK = 0
     TRAM = 200
     STREETCAR = 200
     LIGHT_RAIL = 200

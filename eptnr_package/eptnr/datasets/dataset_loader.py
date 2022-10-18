@@ -3,6 +3,7 @@ import geopandas as gdp
 from typing import Tuple, Union
 import pickle
 from .synthetic_datasets import SyntheticDatasets
+from pathlib import Path
 
 
 def load_dataset(which: SyntheticDatasets) -> Tuple[ig.Graph, Union[gdp.GeoDataFrame, dict]]:
@@ -14,9 +15,10 @@ def load_dataset(which: SyntheticDatasets) -> Tuple[ig.Graph, Union[gdp.GeoDataF
         - FOUR: Graph & RewardDict
         - FIVE: Graph & RewardDict
     """
-    graph = ig.read(which.value / 'graph.picklez')
+    BASE_PATH = Path(__file__).parent
+    graph = ig.read(BASE_PATH / which.value / 'graph.picklez')
 
     if which in [SyntheticDatasets.ONE, SyntheticDatasets.TWO, SyntheticDatasets.THREE]:
-        return graph, gdp.read_file(which.value / 'census_data.geojson', engine='GeoJSON')
+        return graph, gdp.read_file(BASE_PATH / which.value / 'census_data.geojson')
     else:
-        return graph, pickle.load(which.value / 'reward_dict.pkl')
+        return graph, pickle.load(BASE_PATH / which.value / 'reward_dict.pkl')

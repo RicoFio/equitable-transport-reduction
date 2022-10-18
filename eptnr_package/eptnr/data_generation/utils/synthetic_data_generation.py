@@ -9,6 +9,8 @@ from .synthetic_speeds import SyntheticTravelSpeeds
 from ...constants.igraph_edge_types import IGraphEdgeTypes
 from ...constants.igraph_colors import IGraphColors
 from ...constants.igraph_vertex_types import IGraphVertexTypes
+from enum import Enum
+from ...constants.gtfs_network_costs_per_distance_unit import GTFSNetworkCostsPerDistanceUnit
 from .eptnr_vertex import EPTNRVertex
 import itertools as it
 
@@ -38,7 +40,8 @@ def compute_dist_from_es(g: ig.Graph, es: List[Tuple[str, str]], round_to_decima
 
 def graph_edge_entry(graph: ig.Graph, edges: List[Tuple[EPTNRVertex, EPTNRVertex]], names: List[str],
                      speed: SyntheticTravelSpeeds, edge_type: IGraphEdgeTypes,
-                     color: IGraphColors = IGraphColors.BLACK, round_to_decimals: int = 2):
+                     cost: Enum = GTFSNetworkCostsPerDistanceUnit, color: IGraphColors = IGraphColors.BLACK,
+                     round_to_decimals: int = 2) -> None:
     """
     Commodity function to add edges to `graph`
     """
@@ -50,6 +53,7 @@ def graph_edge_entry(graph: ig.Graph, edges: List[Tuple[EPTNRVertex, EPTNRVertex
         'distance': distances,
         'tt': travel_times,
         'weight': travel_times,
+        'cost': cost[edge_type.name].value,
         'color': color.value,
         'type': edge_type.value,
     }
