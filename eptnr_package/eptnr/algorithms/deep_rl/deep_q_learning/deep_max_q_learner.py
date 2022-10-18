@@ -35,7 +35,7 @@ class DeepMaxQLearner(AbstractDeepQLearner):
             cum_reward = 0
             max_reward = -math.inf
             # while the state is not the terminal state
-            while state[state == 1].size()[0] < self.goal:
+            while state[state == 1].size()[0] < len(self.actions):
 
                 # Choose action with epsilon-greedy strategy
                 epsilon = self.eps_schedule.get_current_eps()
@@ -68,14 +68,14 @@ class DeepMaxQLearner(AbstractDeepQLearner):
             cum_rewards_over_episodes.append(cum_reward)
             max_rewards_over_episodes.append(max_reward)
 
-            # if verbose:
-            #     logger.info(f'#######')
-            #     logger.info(f'Currently in episode {self.curr_episode}')
-            #     logger.info(f'\tEpsilon value: {curr_eps_value}')
-            #     logger.info(f'\tCumulative reward: {cum_reward}')
-            #     logger.info(f'\tMaximum reward: {max_reward}')
-            #     logger.info(f'\tPolicy network loss: {"" if not self.policy_net_loss else self.policy_net_loss[-1]}')
-            #     logger.info(f'#######\n')
+            if verbose:
+                logger.info(f'#######')
+                logger.info(f'Currently in episode {self.curr_episode}')
+                logger.info(f'\tEpsilon value: {curr_eps_value}')
+                logger.info(f'\tCumulative reward: {cum_reward}')
+                logger.info(f'\tMaximum reward: {max_reward}')
+                logger.info(f'\tPolicy network loss: {"" if not self.policy_net_loss else self.policy_net_loss[-1]}')
+                logger.info(f'#######\n')
 
         self.trained = True
 
@@ -98,7 +98,7 @@ class DeepMaxQLearner(AbstractDeepQLearner):
         taken_actions = []
         rewards_per_removal = []
 
-        for i in range(self.goal):
+        for i in range(len(self.actions)):
             action_idx = self.choose_action(state, 0)
             taken_actions.append(action_idx.item())
             state, reward = self.step(state, action_idx)

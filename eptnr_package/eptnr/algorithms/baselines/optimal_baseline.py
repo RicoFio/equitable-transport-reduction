@@ -12,23 +12,23 @@ logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
 
-def optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],
-                     budget: int = 5) -> List[Tuple[List[float], List[int]]]:
+def optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> List[Tuple[List[float], List[int]]]:
     """
 
     Args:
         g:
         reward:
         edge_types:
-        budget:
 
     Returns:
 
     """
-    assert 0 < budget < len(g.es.select(type_in=edge_types))
+    assert 0 < len(g.es.select(type_in=edge_types))
 
     removable_edges = g.es.select(type_in=edge_types, active_eq=1)
-    possible_combinations = [[e.index for e in es] for es in it.combinations(removable_edges, budget)]
+    possible_combinations = [[e.index for e in es]
+                             for k in range(len(removable_edges))
+                             for es in it.combinations(removable_edges, k)]
 
     logger.info(f"Possible states: {possible_combinations}")
     rewards = -np.ones(len(possible_combinations)) * np.inf
@@ -46,36 +46,34 @@ def optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],
     for cand_i in max_reward_candidates_idxs:
         logger.info(f"For state {possible_combinations[cand_i]} obtained rewards {rewards[cand_i]}")
         es_idx_list = possible_combinations[cand_i]
-        rewards_per_removal = compute_rewards_over_removals(g, budget, reward, es_idx_list)
+        rewards_per_removal = compute_rewards_over_removals(g, reward, es_idx_list)
         optimal_solutions_and_rewards_per_removal.append((rewards_per_removal, es_idx_list))
 
     return optimal_solutions_and_rewards_per_removal
 
 
 def optimal_max_baseline(g: ig.Graph, reward: BaseReward,
-                         edge_types: List[str], budget: int = 5) -> List[Tuple[List[float], List[int]]]:
+                         edge_types: List[str]) -> List[Tuple[List[float], List[int]]]:
     """
-    Optimal baseline considering all solutions in 0<k<=budget, i.e. S = {nC1, nC2, ..., nCbudget}
     Args:
         g:
         reward:
         edge_types:
-        budget:
 
     Returns:
         List of optimal configuration reaching maximum rewards over all solutions in S as a
         list of rewards over each removal in that solution and the edges removed.
     """
-    assert budget > 0
-    assert budget < len(g.es.select(type_in=edge_types))
+    available_edges_to_remove = g.es.select(type_in=edge_types)
+    assert 0 < available_edges_to_remove
 
     all_opt = []
-    for k in range(1, budget):
-        opt_sol_rew_tuple_list = optimal_baseline(g, reward, edge_types, k)
+    for k in range(1, len(available_edges_to_remove)):
+        opt_sol_rew_tuple_list = optimal_baseline(g, reward, edge_types)
         all_opt.extend(opt_sol_rew_tuple_list)
 
     all_opt = np.array(all_opt, dtype=object)
-    opt_idxs = np.argmax(all_opt[:,0][-1]).tolist()
+    opt_idxs = np.argmax(all_opt[:, 0][-1]).tolist()
     opt_idxs = [opt_idxs] if isinstance(opt_idxs, int) else opt_idxs
 
     output = []

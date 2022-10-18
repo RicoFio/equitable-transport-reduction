@@ -16,7 +16,7 @@ class ExpectedQLearner(AbstractQLearner):
         for ep, _ in enumerate(iterator):
             ord_state = self.get_state_key(self.starting_state)
             rewards = 0
-            while len(ord_state) != self.goal:
+            while len(ord_state) != len(self.actions):
 
                 epsilon = self.eps_schedule.get_current_eps()
 

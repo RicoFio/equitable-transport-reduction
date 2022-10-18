@@ -3,10 +3,13 @@ from datetime import datetime
 import geopandas as gpd
 from typing import List
 import igraph as ig
+from enum import Enum
 
 import networkx as nx
 from pathlib import Path
 from ..constants.osm_network_types import OSMNetworkTypes
+from ..constants.gtfs_network_types import GTFSNetworkTypes
+from ..constants.gtfs_network_costs_per_distance_unit import GTFSNetworkCostsPerDistanceUnit
 from .gtfs_graph_generator import GTFSGraphGenerator
 from .osm_graph_generation import OSMGraphGenerator
 from ..constants.travel_speed import MetricTravelSpeed
@@ -20,11 +23,14 @@ logger.setLevel(logging.DEBUG)
 
 
 class ProblemGraphGenerator:
-
+    # TODO change dat into ENUM
+    # TODO change modalities into ENUM
+    # TODO change distances_computation_mode into ENUM
     def __init__(self, city: str, gtfs_zip_file_path: Path, out_dir_path: Path,
                  day: str, time_from: str, time_to: str, agencies: List[str],
                  poi_gdf: gpd.GeoDataFrame, census_gdf: gpd.GeoDataFrame, modalities: List[str] = None,
-                 distances_computation_mode: str = 'osmnx') -> None:
+                 distances_computation_mode: str = 'osmnx',
+                 costs: Enum = GTFSNetworkCostsPerDistanceUnit) -> None:
         """
 
         Args:
@@ -38,13 +44,14 @@ class ProblemGraphGenerator:
             census_gdf:
             modalities: A list of modalities (e.g. ['tram', 'metro', 'bus']) to filter for. If None all modalities
                         are regarded.
+            costs: The cost per distance unit (e.g. per meter) for each GTFS type (or the modality selected)
         """
         self.city = city
         self.gtfs_graph_generator = GTFSGraphGenerator(city=city, gtfs_zip_file_path=gtfs_zip_file_path,
                                                        out_dir_path=out_dir_path, day=day,
                                                        time_from=time_from, time_to=time_to, agencies=agencies,
-                                                       contract_vertices=True, modalities=modalities)
-        self.osm_graph_generator = OSMGraphGenerator(city=city, network_type=OSMNetworkTypes.walk,
+                                                       contract_vertices=True, modalities=modalities, costs=costs)
+        self.osm_graph_generator = OSMGraphGenerator(city=city, network_type=OSMNetworkTypes.WALK,
                                                      graph_out_path=out_dir_path)
         self.out_dir_path = out_dir_path
         self.poi_gdf = poi_gdf
@@ -135,7 +142,7 @@ class ProblemGraphGenerator:
 
         for es_attr in g.es.attributes():
             if es_attr not in ['name', 'routetype', 'uniqueagencyid', 'uniquerouteid',
-                               'tt', 'weight', 'color', 'type', 'active']:
+                               'tt', 'weight', 'cost', 'color', 'type', 'active']:
                 del g.es[es_attr]
 
         final_out_file = self.out_dir_path.joinpath(f"{self.city}_problem_graph_{datetime.now().date()}.gml")

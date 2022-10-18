@@ -2,11 +2,16 @@ import os
 from typing import List
 from pathlib import Path
 from zipfile import ZipFile
+from enum import Enum
+import math
+from tqdm import tqdm
 
 import networkx as nx
 import urbanaccess as ua
 import pandas as pd
 import subprocess
+import numpy as np
+from haversine import haversine, Unit
 
 from .utils.graph_helper_utils import (
     ua_transit_network_to_nx,
@@ -18,6 +23,7 @@ from .utils.file_management_utils import (
     remove_files_in_dir,
 )
 from ..constants.gtfs_network_types import GTFSNetworkTypes
+from ..constants.gtfs_network_costs_per_distance_unit import GTFSNetworkCostsPerDistanceUnit
 import igraph as ig
 import logging
 
@@ -31,7 +37,7 @@ class GTFSGraphGenerator:
     def __init__(self, city: str, gtfs_zip_file_path: Path, out_dir_path: Path,
                  day: str, time_from: str, time_to: str,
                  agencies: List[str] = None, contract_vertices: bool = False,
-                 modalities: List[str] = None) -> None:
+                 modalities: List[str] = None, costs: Enum = GTFSNetworkCostsPerDistanceUnit) -> None:
         self.city = city
         bbox = get_bbox(city)
         # (lng_max, lat_min, lng_min, lat_max)
@@ -44,6 +50,7 @@ class GTFSGraphGenerator:
         self.time_to = time_to
         self.contract_vertices = contract_vertices
         self.modalities = modalities
+        self.costs = costs
 
     def _filter_gtfs(self):
         out_path = self.gtfs_file_path.parent \
@@ -112,15 +119,57 @@ class GTFSGraphGenerator:
                 G_transit = ua_transit_network_to_nx(transit_net)
                 G_transit = append_length_attribute(G_transit)
 
+                def get_distance(origin_station_id, destination_station_id, trip_id):
+                    osid = origin_station_id.split('_')[0]
+                    dsid = destination_station_id.split('_')[0]
+                    tid = trip_id.split('_')[0]
+                    stdf = loaded_feeds.stop_times
+                    dist = stdf[stdf.trip_id == tid]
+                    d_origin = dist[dist['stop_id'] == osid]['shape_dist_traveled'].item()
+                    d_destination = dist[dist['stop_id'] == dsid]['shape_dist_traveled'].item()
+                    distance = np.round(abs(d_destination - d_origin), decimals=2)
+
+                    if math.isinf(distance):
+                        sdf = loaded_feeds.stops
+                        origin_loc = sdf[sdf['stop_id'] == osid][['stop_lat', 'stop_lon']].tuple()
+                        destination_loc = sdf[sdf['stop_id'] == dsid][['stop_lat', 'stop_lon']].tuple()
+                        distance = haversine(origin_loc, destination_loc, unit=Unit.METERS)
+                    return distance
+
                 # Add edge attributes
-                edge_attrs = {
-                    (node1, node2, key): {
-                        'type': GTFSNetworkTypes(int(data['route_type'])).name.lower(),
-                        'tt': data['travel_time'],
+                i = 0
+                edge_attrs = {}
+                for node1, node2, key, data in tqdm(G_transit.edges(keys=True, data=True)):
+                    rt = GTFSNetworkTypes(int(data['route_type'])).name
+                    dist = get_distance(node1, node2, data['unique_trip_id'])
+                    entry = {
+                        'type': rt,
+                        'tt': np.round(data['travel_time'], decimals=2),
+                        'distance': dist,
+                        'cost': dist * self.costs[rt].value,
                         'name': data['unique_route_id'] + '_' + str(data['sequence']),
                         'color': 'BLACK',
-                    } for node1, node2, key, data in G_transit.edges(keys=True, data=True)
-                }
+                    }
+                    edge_attrs[(node1, node2, key)] = entry
+
+                malformed_edge_attr = {k:v for k, v in edge_attrs.items() if math.isnan(v['distance']) or math.isinf(v['distance'])}
+
+                route_types = {data['type'] for _, data in edge_attrs.items()}
+                avg_speeds = {}
+
+                for rt in route_types:
+                    rt_entries = {k:v for k, v in edge_attrs.items() if v['type'] == rt and not math.isnan(v['distance'])}
+                    rt_tt = np.array([data['tt'] for _, data in rt_entries.items()])
+                    rt_dist = np.array([data['distance'] for _, data in rt_entries.items()])
+                    rt_speeds = rt_dist / rt_tt
+                    logger.debug(f"For type {rt}, mean is {np.average(rt_speeds)} with std {np.std(rt_speeds)}")
+                    avg_speeds[rt] = np.average(rt_speeds)
+
+                for k, v in malformed_edge_attr.items():
+                    tt = v['tt']
+                    distance = tt * avg_speeds[v['type']]
+                    cost = distance * self.costs[v['type']].value
+                    edge_attrs[k].update({'distance': distance, 'cost': cost})
 
                 nx.set_edge_attributes(G_transit, edge_attrs)
 
@@ -136,7 +185,7 @@ class GTFSGraphGenerator:
                 nx.set_node_attributes(G_transit, node_attrs)
 
                 if self.modalities:
-                    non_modality_nodes = [n for n,v in G_transit.nodes(data=True)
+                    non_modality_nodes = [n for n, v in G_transit.nodes(data=True)
                                           if v['modality_type'] not in self.modalities]
                     G_transit.remove_nodes_from(non_modality_nodes)
 

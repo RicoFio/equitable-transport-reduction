@@ -1,17 +1,8 @@
-from pathlib import Path
-from enum import Enum
 import igraph as ig
 import geopandas as gdp
 from typing import Tuple, Union
 import pickle
-
-
-class SyntheticDatasets(Enum):
-    ONE = Path('./synthetic_1')
-    TWO = Path('./synthetic_2')
-    THREE = Path('./synthetic_3')
-    FOUR = Path('./synthetic_4')
-    FIVE = Path('./synthetic_5')
+from .synthetic_datasets import SyntheticDatasets
 
 
 def load_dataset(which: SyntheticDatasets) -> Tuple[ig.Graph, Union[gdp.GeoDataFrame, dict]]:

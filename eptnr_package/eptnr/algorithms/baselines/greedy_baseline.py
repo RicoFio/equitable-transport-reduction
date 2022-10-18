@@ -3,17 +3,16 @@ import igraph as ig
 from ...rewards import BaseReward
 
 
-def greedy_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],
-                    budget: int = 5) -> Tuple[List[float], List[int]]:
+def greedy_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> Tuple[List[float], List[int]]:
     removable_edges = g.es.select(type_in=edge_types, active_eq=1)
-    assert 0 < budget < len(removable_edges)
+    assert 0 < len(removable_edges)
 
     removed_edges = []
     rewards_per_removal = []
 
     g_prime = g.copy()
 
-    for i in range(budget):
+    for i in range(len(removable_edges)):
         removable_edges = g_prime.es.select(type_in=edge_types, active_eq=1)
 
         all_rewards = {}
@@ -32,9 +31,8 @@ def greedy_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],
     return rewards_per_removal, removed_edges
 
 
-def greedy_max_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],
-                        budget: int = 5) -> Tuple[List[float], List[int]]:
-    rewards_per_removal, removed_edges = greedy_baseline(g, reward, edge_types, budget)
+def greedy_max_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> Tuple[List[float], List[int]]:
+    rewards_per_removal, removed_edges = greedy_baseline(g, reward, edge_types)
     max_reward_index = rewards_per_removal.index(max(rewards_per_removal)) + 1
 
     return rewards_per_removal[:max_reward_index], removed_edges[:max_reward_index]
