@@ -12,7 +12,7 @@ logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
 
-def optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> List[Tuple[List[float], List[int]]]:
+def _optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> List[Tuple[List[float], List[int]]]:
     """
 
     Args:
@@ -30,7 +30,7 @@ def optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> 
                              for k in range(len(removable_edges))
                              for es in it.combinations(removable_edges, k)]
 
-    logger.info(f"Possible states: {possible_combinations}")
+    # logger.info(f"Possible states: {possible_combinations}")
     rewards = -np.ones(len(possible_combinations)) * np.inf
 
     for i, candidate in enumerate(tqdm(possible_combinations)):
@@ -65,11 +65,11 @@ def optimal_max_baseline(g: ig.Graph, reward: BaseReward,
         list of rewards over each removal in that solution and the edges removed.
     """
     available_edges_to_remove = g.es.select(type_in=edge_types)
-    assert 0 < available_edges_to_remove
+    assert 0 < len(available_edges_to_remove)
 
     all_opt = []
     for k in range(1, len(available_edges_to_remove)):
-        opt_sol_rew_tuple_list = optimal_baseline(g, reward, edge_types)
+        opt_sol_rew_tuple_list = _optimal_baseline(g, reward, edge_types)
         all_opt.extend(opt_sol_rew_tuple_list)
 
     all_opt = np.array(all_opt, dtype=object)
