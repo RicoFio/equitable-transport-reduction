@@ -120,9 +120,10 @@ class GTFSGraphGenerator:
                 G_transit = append_length_attribute(G_transit)
 
                 def get_distance(origin_station_id, destination_station_id, trip_id):
-                    osid = origin_station_id.split('_')[0]
-                    dsid = destination_station_id.split('_')[0]
-                    tid = trip_id.split('_')[0]
+                    osid = origin_station_id
+                    dsid = destination_station_id
+                    tid = trip_id
+
                     stdf = loaded_feeds.stop_times
                     dist = stdf[stdf.trip_id == tid]
                     d_origin = dist[dist['stop_id'] == osid]['shape_dist_traveled'].item()
@@ -137,16 +138,48 @@ class GTFSGraphGenerator:
                     return distance
 
                 # Add edge attributes
-                i = 0
                 edge_attrs = {}
                 for node1, node2, key, data in tqdm(G_transit.edges(keys=True, data=True)):
                     rt = GTFSNetworkTypes(int(data['route_type'])).name
-                    dist = get_distance(node1, node2, data['unique_trip_id'])
+
+                    osid = node1.split('_')[0]
+                    dsid = node2.split('_')[0]
+                    tid = data['unique_trip_id'].split('_')[0]
+
+                    dist = get_distance(osid, dsid, tid)
+
+                    rid = loaded_feeds.trips[loaded_feeds.trips.trip_id == tid].unique_route_id.tolist()[0]
+                    rid = rid.split('_')[0]
+                    trip_ids = loaded_feeds.trips[loaded_feeds.trips.route_id == rid].trip_id
+                    stop_times_filter = loaded_feeds.stop_times.trip_id.isin(trip_ids)
+                    all_trips_on_a_route: pd.DataFrame = loaded_feeds.stop_times[stop_times_filter]
+
+                    all_trips_on_a_route['orig_stop_id'] = all_trips_on_a_route['stop_id']
+                    del all_trips_on_a_route['stop_id']
+
+                    dests = all_trips_on_a_route.groupby('trip_id')['orig_stop_id'].shift(-1)
+                    dests_str_list = dests.astype('Int64', errors='ignore').astype('str', errors='ignore').tolist()
+                    all_trips_on_a_route['dest_stop_id'] = dests_str_list
+
+                    trip_count = all_trips_on_a_route[
+                        (all_trips_on_a_route.orig_stop_id == osid) &
+                        (all_trips_on_a_route.dest_stop_id == dsid)].shape[0]
+
+                    trip_count += all_trips_on_a_route[
+                        (all_trips_on_a_route.dest_stop_id == dsid) &
+                        (all_trips_on_a_route.orig_stop_id == osid)].shape[0]
+
+                    # Make sure there's at least one trip such that the cost isn't 0
+                    if trip_count == 0:
+                        logger.warning(f"Found connection between {osid} and {dsid} to have 0 trips.\n"
+                                       f"Adding one to make sure that cost isn't 0")
+                        trip_count = 1
+
                     entry = {
                         'type': rt,
                         'tt': np.round(data['travel_time'], decimals=2),
                         'distance': dist,
-                        'cost': dist * self.costs[rt].value,
+                        'cost': trip_count * dist * self.costs[rt].value,
                         'name': data['unique_route_id'] + '_' + str(data['sequence']),
                         'color': 'BLACK',
                     }

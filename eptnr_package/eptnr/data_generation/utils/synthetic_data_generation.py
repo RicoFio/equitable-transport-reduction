@@ -53,7 +53,7 @@ def graph_edge_entry(graph: ig.Graph, edges: List[Tuple[EPTNRVertex, EPTNRVertex
         'distance': distances,
         'tt': travel_times,
         'weight': travel_times,
-        'cost': cost[edge_type.name].value,
+        'cost': distances * cost[edge_type.name].value,
         'color': color.value,
         'type': edge_type.value,
     }

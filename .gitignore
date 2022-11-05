@@ -136,3 +136,6 @@ reference_papers/
 
 # Non-filtered GTFS files
 ^.*gtfs((?!-filtered-).)*.zip
+
+# Non-shareable information
+./figures/GVB
