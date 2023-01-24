@@ -1,0 +1,10 @@
+name: eptnr
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - gdal=3.6.2
+  - pip
+  - pip:
+      - -e ./eptn_package
