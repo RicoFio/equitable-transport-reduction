@@ -12,7 +12,8 @@ logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
 
-def _optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) -> List[Tuple[List[float], List[int]]]:
+def _optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str],
+                      current_k: int) -> List[Tuple[List[float], List[int]]]:
     """
 
     Args:
@@ -27,8 +28,7 @@ def _optimal_baseline(g: ig.Graph, reward: BaseReward, edge_types: List[str]) ->
 
     removable_edges = g.es.select(type_in=edge_types, active_eq=1)
     possible_combinations = [[e.index for e in es]
-                             for k in range(len(removable_edges))
-                             for es in it.combinations(removable_edges, k)]
+                             for es in it.combinations(removable_edges, current_k)]
 
     # logger.info(f"Possible states: {possible_combinations}")
     rewards = -np.ones(len(possible_combinations)) * np.inf
@@ -68,12 +68,22 @@ def optimal_max_baseline(g: ig.Graph, reward: BaseReward,
     assert 0 < len(available_edges_to_remove)
 
     all_opt = []
-    for k in range(1, len(available_edges_to_remove)):
-        opt_sol_rew_tuple_list = _optimal_baseline(g, reward, edge_types)
-        all_opt.extend(opt_sol_rew_tuple_list)
+    for k in range(1, len(available_edges_to_remove) + 1):
+        opt_solutions = _optimal_baseline(g, reward, edge_types, k)
 
+        for (rewards_over_removals, edges) in opt_solutions:
+            max_reward_idx = np.argmax(rewards_over_removals)
+            res_tuple = (
+                [
+                    rewards_over_removals[max_reward_idx],
+                    edges[:max_reward_idx+1]
+                ],
+            )
+            all_opt.extend(res_tuple)
+
+    logger.info(f"All optimal solutions are: {all_opt}")
     all_opt = np.array(all_opt, dtype=object)
-    opt_idxs = np.argmax(all_opt[:, 0][-1]).tolist()
+    opt_idxs = np.argmax(all_opt[:, 0]).tolist()
     opt_idxs = [opt_idxs] if isinstance(opt_idxs, int) else opt_idxs
 
     output = []

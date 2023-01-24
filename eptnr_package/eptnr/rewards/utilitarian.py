@@ -68,15 +68,13 @@ class UtilitarianCostReward(BaseReward):
         return reward
 
     def evaluate(self, g: ig.Graph, *args, **kwargs) -> float:
-        utilitarian_reward = -self.utilitarian_reward.evaluate(g, *args, **kwargs)
+        utilitarian_reward = self.utilitarian_reward.evaluate(g, *args, **kwargs)
 
         total_savings = sum(g.es.select(active=0)['cost'])
 
         partial_utilitarian_reward = self.utilitarian_rg.generate_reward(utilitarian_reward)
         partial_cost_reward = self.cost_rg.generate_reward(abs(total_savings - self.monetary_budget))
 
-        # We use the negative chebyshev as the reward is for a maximization problem but we want to
-        # minimize both, the deviation from the budget and the inequality
-        final_reward = -chebyshev_reward_computation(partial_utilitarian_reward, partial_cost_reward)
+        final_reward = chebyshev_reward_computation(partial_utilitarian_reward, partial_cost_reward)
 
         return final_reward

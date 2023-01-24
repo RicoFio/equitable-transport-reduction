@@ -8,3 +8,4 @@ class SyntheticDatasets(Enum):
     THREE = Path('./synthetic_3')
     FOUR = Path('./synthetic_4')
     FIVE = Path('./synthetic_5')
+    SIX = Path('./synthetic_6')
