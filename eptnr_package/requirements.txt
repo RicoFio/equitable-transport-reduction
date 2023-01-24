@@ -3,6 +3,7 @@ geopandas==0.11.1
 numpy==1.23.3
 torch==1.12.1
 matplotlib==3.6.0
+seaborn==0.12.2
 igraph==0.9.10
 networkx==2.8.6
 osmnx==1.2.2
