@@ -9,7 +9,7 @@ If you would simply want to run the experiments presented in the Notebooks:
 ```shell
 $ git clone https://github.com/RicoFio/equitable-transport-reduction
 $ cd equitable-transport-reduction
-$ conda env create -f ./en
+$ conda env create -f ./conda_env.yaml
 ```
 
 # Citations
