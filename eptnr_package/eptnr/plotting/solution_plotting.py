@@ -46,7 +46,7 @@ def plot_rewards(ax: plt.Axes, edges: List[int], rewards: List[float],
     return ax
 
 
-def plot_graph(ax: plt.Axes, base_graph: ig.Graph, edges: List[int]):
+def plot_graph(ax: plt.Axes, base_graph: ig.Graph, edges: List[int], edge_types_to_plot: List[str] = None):
     g_prime: ig.Graph = base_graph.copy()
     g_prime.vs.select(type_eq='rc_node')['color'] = 'red'
     g_prime.vs.select(type_eq='pt_node')['color'] = 'blue'
@@ -67,7 +67,8 @@ def plot_graph(ax: plt.Axes, base_graph: ig.Graph, edges: List[int]):
 
     label_set = False
     for j, (arrow, edge) in enumerate(zip(arrows, base_graph.es)):
-
+        if edge_types_to_plot and edge['type'] not in edge_types_to_plot:
+            continue
         if edge['type'] == 'walk':
             arrow.set_color('gray')
             arrow.set_alpha(0.2)
@@ -107,8 +108,8 @@ def plot_rewards_and_graphs(base_graph: ig.Graph, solutions: List[Tuple[List[flo
     return fig, ax
 
 
-def plot_full_problem_exploration(base_graph: ig.Graph,
-                                  configurations: List[List[List[int]]], rewards: List[List[float]]):
+def plot_full_problem_exploration(base_graph: ig.Graph, configurations: List[List[List[int]]],
+                                  rewards: List[List[float]], edge_types_to_plot: List[str] = None):
     n_cols = len(configurations)
     n_rows = max([len(c) for c in configurations])
 
@@ -121,7 +122,7 @@ def plot_full_problem_exploration(base_graph: ig.Graph,
         max_reward = max(rewards_candidates)
 
         for j, (cand, reward) in enumerate(zip(config_candidates, rewards_candidates)):
-            plot_graph(ax=ax[j, i], base_graph=base_graph, edges=cand)
+            plot_graph(ax=ax[j, i], base_graph=base_graph, edges=cand, edge_types_to_plot=edge_types_to_plot)
             # ax[j, i].legend([], [f'$\\mathdefault{reward}$'],
             #                 loc="lower center", title="Reward")
             font = {'family': 'DejaVu Sans',

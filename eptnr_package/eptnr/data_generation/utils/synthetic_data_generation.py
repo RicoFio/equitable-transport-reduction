@@ -41,19 +41,21 @@ def compute_dist_from_es(g: ig.Graph, es: List[Tuple[str, str]], round_to_decima
 def graph_edge_entry(graph: ig.Graph, edges: List[Tuple[EPTNRVertex, EPTNRVertex]], names: List[str],
                      speed: SyntheticTravelSpeeds, edge_type: IGraphEdgeTypes,
                      cost: Enum = GTFSNetworkCostsPerDistanceUnit, color: IGraphColors = IGraphColors.BLACK,
-                     round_to_decimals: int = 2) -> None:
+                     round_to_decimals: int = 2, fixed_travel_times: list[float] = None,
+                     fixed_costs: list[float] = None) -> None:
     """
     Commodity function to add edges to `graph`
     """
     edges_with_v_names = [(vs[0].name, vs[1].name) for vs in edges]
     distances= compute_dist_from_es(graph, edges_with_v_names)
-    travel_times = np.round((distances * 1 / speed.value) * 60, decimals=round_to_decimals)
+    travel_times = fixed_travel_times or np.round((distances * 1 / speed.value) * 60, decimals=round_to_decimals)
+    cost = fixed_costs or distances * cost[edge_type.name].value
     edges_attrs = {
         'name': names or None,
         'distance': distances,
         'tt': travel_times,
         'weight': travel_times,
-        'cost': distances * cost[edge_type.name].value,
+        'cost': cost,
         'color': color.value,
         'type': edge_type.value,
     }

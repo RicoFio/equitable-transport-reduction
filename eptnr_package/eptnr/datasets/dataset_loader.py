@@ -18,7 +18,7 @@ def load_dataset(which: SyntheticDatasets) -> Tuple[ig.Graph, Union[gdp.GeoDataF
     BASE_PATH = Path(__file__).parent
     graph = ig.read(BASE_PATH / which.value / 'graph.picklez')
 
-    if which in [SyntheticDatasets.ONE, SyntheticDatasets.TWO, SyntheticDatasets.THREE]:
+    if which in [SyntheticDatasets.ONE, SyntheticDatasets.TWO, SyntheticDatasets.THREE, SyntheticDatasets.SIX]:
         return graph, gdp.read_file(BASE_PATH / which.value / 'census_data.geojson')
     else:
         return graph, pickle.load(BASE_PATH / which.value / 'reward_dict.pkl')

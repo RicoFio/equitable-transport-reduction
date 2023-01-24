@@ -57,11 +57,10 @@ class BaseReward(abc.ABC):
         if self.verbose:
             logger.info("Received graph with:\n"
                         f"\tn_edges={len(g.es)}"
-                        f"\tn_vertices={len(g.vs)}"
+                        f"\tn_vertices={len(g.vs)}\n"
                         f"Created subgraph:\n"
                         f"\tn_edges={len(g_prime.es)}\n"
-                        f"\tn_vertices={len(g_prime.vs)}\n"
-                        f"\tavailable_edges={[e.index for e in g_prime.es]}")
+                        f"\tn_vertices={len(g_prime.vs)}")
         calculated_reward = self._evaluate(g_prime, *args, **kwargs)
         if self.reward_scaling:
             scaled_reward = self._reward_scaling(calculated_reward)

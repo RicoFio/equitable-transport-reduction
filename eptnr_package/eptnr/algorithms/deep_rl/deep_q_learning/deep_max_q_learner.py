@@ -17,10 +17,10 @@ class DeepMaxQLearner(AbstractDeepQLearner):
     def _compute_q_learning_targets(self, reward_batch: torch.tensor, next_state_values: torch.tensor) -> torch.tensor:
         return torch.max(reward_batch, (self.gamma * next_state_values))
 
-    def train(self, return_cum_rewards_over_episodes: bool = True,
-              return_max_rewards_over_episodes: bool = True,
-              return_epsilon_over_episodes: bool = True,
-              verbose: bool = True) -> Optional[Tuple[List[float], List[float], List[float]]]:
+    def train(self, return_cum_rewards_over_episodes: bool = False,
+              return_max_rewards_over_episodes: bool = False,
+              return_epsilon_over_episodes: bool = False,
+              verbose: bool = False) -> Optional[Tuple[List[float], List[float], List[float]]]:
 
         cum_rewards_over_episodes = []
         max_rewards_over_episodes = []

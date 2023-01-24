@@ -32,7 +32,7 @@ class EgalitarianTheilReward(BaseReward):
 
     def _reward_scaling(self, reward: float) -> float:
         # Would be better if we could make this less random
-        return np.exp(-5 * reward) * 100
+        return -reward
 
 
 class InverseTheilReward(BaseReward):
